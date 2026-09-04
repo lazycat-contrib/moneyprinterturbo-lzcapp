@@ -12,4 +12,14 @@ if [ ! -s "$config_file" ]; then
   mv -f "$temporary_file" "$config_file"
 fi
 
+if grep -q '^endpoint = ""$' "$config_file"; then
+  escaped_endpoint=$(printf '%s' "$MPT_PUBLIC_API_URL" | sed 's/[\\&|]/\\&/g')
+  sed -i "s|^endpoint = \"\"$|endpoint = \"$escaped_endpoint\"|" "$config_file"
+fi
+
+if grep -q '^api_key = ""$' "$config_file"; then
+  escaped_api_key=$(printf '%s' "$MPT_API_KEY" | sed 's/[\\&|]/\\&/g')
+  sed -i "s|^api_key = \"\"$|api_key = \"$escaped_api_key\"|" "$config_file"
+fi
+
 ln -sfn "$config_file" /MoneyPrinterTurbo/config.toml

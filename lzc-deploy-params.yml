@@ -1,0 +1,17 @@
+params:
+  - id: api_key
+    type: secret
+    name: API Key
+    description: Secret used by API clients through the x-api-key header; the generated alphanumeric default is recommended
+    default_value: "$random(len=32)"
+    optional: false
+
+locales:
+  zh:
+    api_key:
+      name: API 密钥
+      description: API 客户端通过 x-api-key 请求头使用的密钥；建议保留自动生成的字母数字默认值
+  en:
+    api_key:
+      name: API Key
+      description: Secret used by API clients through the x-api-key header; the generated alphanumeric default is recommended
