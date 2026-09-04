@@ -1,0 +1,34 @@
+application:
+  subdomain: moneyprinterturbo
+  multi_instance: false
+  upstreams:
+    - location: /
+      backend: http://webui:8501/
+      fix_websocket_header: true
+  injects:
+    - id: open-save-chooser
+      on: browser
+      when:
+        - /*
+      do:
+        - src: file:///lzcapp/pkg/content/lazycat-injects/lzc-file-chooser-inject.js
+
+services:
+  webui:
+    # upstream: ghcr.io/harry0703/moneyprinterturbo:1.3.6
+    image: ghcr.1ms.run/harry0703/moneyprinterturbo@sha256:e32a625725eb9bb89640b3573929f7f08792135e4df74fa9597b7ff834c4ad05
+    command: /bin/sh /lzcapp/pkg/content/runtime/start-webui.sh
+    environment:
+      - MPT_BROWSER_SERVER_ADDRESS={{ .S.AppDomain }}
+    binds:
+      - /lzcapp/var/moneyprinterturbo/storage:/MoneyPrinterTurbo/storage
+
+  api:
+    # upstream: ghcr.io/harry0703/moneyprinterturbo:1.3.6
+    image: ghcr.1ms.run/harry0703/moneyprinterturbo@sha256:e32a625725eb9bb89640b3573929f7f08792135e4df74fa9597b7ff834c4ad05
+    command: /bin/sh /lzcapp/pkg/content/runtime/start-api.sh
+    binds:
+      - /lzcapp/var/moneyprinterturbo/storage:/MoneyPrinterTurbo/storage
+
+usage: |
+  Open MoneyPrinterTurbo and configure the required model and material-provider API keys in the WebUI. Configuration and generated videos persist in the application data directory. The API service is internal and is not exposed as a public route.
