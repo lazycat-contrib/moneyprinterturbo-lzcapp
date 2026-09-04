@@ -25,7 +25,7 @@ services:
     environment:
       - MPT_BROWSER_SERVER_ADDRESS={{ .S.AppDomain }}
       - MPT_PUBLIC_API_URL=https://{{ .S.AppDomain }}/api
-      - {{ printf "MPT_API_KEY=%s" .U.api_key | quote }}
+      - MPT_API_KEY={{ .U.api_key }}
     binds:
       - /lzcapp/var/moneyprinterturbo/storage:/MoneyPrinterTurbo/storage
 
@@ -35,7 +35,7 @@ services:
     command: /bin/sh /lzcapp/pkg/content/runtime/start-api.sh
     environment:
       - MPT_PUBLIC_API_URL=https://{{ .S.AppDomain }}/api
-      - {{ printf "MPT_API_KEY=%s" .U.api_key | quote }}
+      - MPT_API_KEY={{ .U.api_key }}
     binds:
       - /lzcapp/var/moneyprinterturbo/storage:/MoneyPrinterTurbo/storage
 
