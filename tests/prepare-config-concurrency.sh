@@ -1,6 +1,18 @@
 #!/bin/sh
 set -eu
 
+namespace_mode=${1:-auto}
+if [ "$namespace_mode" = auto ]; then
+  if unshare --user --map-root-user --pid --fork true 2>/dev/null; then
+    namespace_mode=user
+  elif sudo -n true 2>/dev/null; then
+    exec sudo -n "$0" root
+  else
+    echo "A user namespace or passwordless sudo is required" >&2
+    exit 1
+  fi
+fi
+
 repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 test_root=$(mktemp -d /tmp/moneyprinterturbo-config-test.XXXXXX)
 trap 'rm -rf "$test_root"' EXIT HUP INT TERM
@@ -24,13 +36,22 @@ while [ "$iteration" -le 25 ]; do
   mkdir -p "$config_dir"
 
   run_prepare() {
-    TEST_CONFIG_DIR="$config_dir" \
-      TEST_RUNTIME_DIR="$test_root/runtime" \
-      TEST_APP_DIR="$test_root/app" \
-      MPT_PUBLIC_API_URL=https://example.test/api \
-      MPT_API_KEY=test-api-key \
-      unshare --user --map-root-user --pid --fork \
-      sh "$test_root/runtime/prepare-config.sh"
+    if [ "$namespace_mode" = user ]; then
+      TEST_CONFIG_DIR="$config_dir" \
+        TEST_RUNTIME_DIR="$test_root/runtime" \
+        TEST_APP_DIR="$test_root/app" \
+        MPT_PUBLIC_API_URL=https://example.test/api \
+        MPT_API_KEY=test-api-key \
+        unshare --user --map-root-user --pid --fork \
+        sh "$test_root/runtime/prepare-config.sh"
+    else
+      TEST_CONFIG_DIR="$config_dir" \
+        TEST_RUNTIME_DIR="$test_root/runtime" \
+        TEST_APP_DIR="$test_root/app" \
+        MPT_PUBLIC_API_URL=https://example.test/api \
+        MPT_API_KEY=test-api-key \
+        unshare --pid --fork sh "$test_root/runtime/prepare-config.sh"
+    fi
   }
 
   run_prepare & first_pid=$!
