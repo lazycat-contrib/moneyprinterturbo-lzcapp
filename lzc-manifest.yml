@@ -6,7 +6,6 @@ application:
       backend: http://api:8080/
     - location: /
       backend: http://webui:8501/
-      fix_websocket_header: true
   public_path:
     - /
   injects:

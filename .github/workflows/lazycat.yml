@@ -16,6 +16,13 @@ jobs:
       - uses: actions/checkout@v7
       - name: Test concurrent configuration initialization
         run: tests/prepare-config-concurrency.sh
+      - name: Check Streamlit WebSocket proxy compatibility
+        run: |
+          grep -q 'backend: http://webui:8501/' lzc-manifest.yml
+          if grep -q 'fix_websocket_header' lzc-manifest.yml; then
+            echo 'Streamlit rejects the duplicated Sec-WebSocket-Key header' >&2
+            exit 1
+          fi
 
   lazycat:
     needs: runtime-test
